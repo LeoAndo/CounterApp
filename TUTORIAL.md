@@ -1,7 +1,7 @@
 # Android アプリ開発入門
 
 Java ベースの Android アプリ開発を学ぶための授業用テキストです。
-このテンプレートプロジェクトを通じて、Android アプリの基本構成を理解しましょう。
+このプロジェクトでは、カウンターアプリを題材に Activity とレイアウト、クリック処理を学びます。
 
 ---
 
@@ -22,7 +22,7 @@ Java ベースの Android アプリ開発を学ぶための授業用テキスト
 ### 1.1 このテキストの目的
 
 このテキストでは、Android Studio を使用して Java ベースの Android アプリを開発する基礎を学びます。
-「Hello World!」を表示するシンプルなアプリを題材に、Android アプリの構成要素を理解しましょう。
+シンプルなカウンターアプリを題材に、UI 部品の配置とクリック処理、状態更新の流れを理解しましょう。
 
 ### 1.2 開発環境
 
@@ -38,6 +38,7 @@ Java ベースの Android アプリ開発を学ぶための授業用テキスト
 - Android アプリのプロジェクト構成を理解する
 - Activity の役割とライフサイクルを理解する
 - XML レイアウトの基本を理解する
+- Button/TextView のクリック処理を実装できるようになる
 - アプリのビルドと実行ができるようになる
 
 ---
@@ -47,36 +48,37 @@ Java ベースの Android アプリ開発を学ぶための授業用テキスト
 ### 2.1 ディレクトリ構造
 
 ```
-JecAndroidJavaTemplate/
+CounterApp/
 ├── app/                          # アプリモジュール
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/            # Java ソースコード
+│   │   │   ├── java/             # Java ソースコード
 │   │   │   │   └── jp/ac/jec/cm0199/jecandroidjavatemplate/
 │   │   │   │       └── MainActivity.java
-│   │   │   ├── res/             # リソースファイル
-│   │   │   │   ├── layout/      # レイアウト XML
-│   │   │   │   ├── values/      # 文字列・色・テーマ
-│   │   │   │   ├── drawable/    # 画像・図形
-│   │   │   │   └── mipmap/      # アプリアイコン
+│   │   │   ├── res/              # リソースファイル
+│   │   │   │   ├── layout/       # レイアウト XML
+│   │   │   │   ├── values/       # 文字列・色・テーマ
+│   │   │   │   ├── drawable/     # 画像・図形
+│   │   │   │   └── mipmap/       # アプリアイコン
 │   │   │   └── AndroidManifest.xml
-│   │   ├── test/                # 単体テスト
-│   │   └── androidTest/         # 計測テスト
-│   └── build.gradle.kts         # アプリのビルド設定
+│   │   ├── test/                 # 単体テスト
+│   │   └── androidTest/          # 計測テスト
+│   └── build.gradle.kts          # アプリのビルド設定
 ├── gradle/
-│   └── libs.versions.toml       # 依存ライブラリのバージョン管理
-├── build.gradle.kts             # プロジェクト全体のビルド設定
-└── settings.gradle.kts          # プロジェクト設定
+│   └── libs.versions.toml        # 依存ライブラリのバージョン管理
+├── build.gradle.kts              # プロジェクト全体のビルド設定
+└── settings.gradle.kts           # プロジェクト設定
 ```
 
 ### 2.2 主要ファイルの役割
 
 | ファイル | 役割 |
 |---------|------|
-| `MainActivity.java` | アプリのメイン画面を制御する Activity |
-| `activity_main.xml` | メイン画面のレイアウト定義 |
+| `MainActivity.java` | カウンター画面を制御する Activity |
+| `activity_main.xml` | カウンター画面のレイアウト定義 |
 | `AndroidManifest.xml` | アプリの基本情報と構成を宣言 |
 | `strings.xml` | 文字列リソース（多言語対応用） |
+| `colors.xml` | UI カラーの定義 |
 | `build.gradle.kts` | ビルド設定と依存ライブラリ |
 
 ---
@@ -89,6 +91,8 @@ JecAndroidJavaTemplate/
 package jp.ac.jec.cm0199.jecandroidjavatemplate;
 
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -97,6 +101,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
+
+    private int count = 0;
+    private TextView txtCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +115,30 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        txtCount = findViewById(R.id.txt_count);
+        Button btnIncrement = findViewById(R.id.btn_increment);
+        Button btnDecrement = findViewById(R.id.btn_decrement);
+        TextView btnReset = findViewById(R.id.btn_reset);
+
+        btnIncrement.setOnClickListener(v -> {
+            count++;
+            updateCountDisplay();
+        });
+
+        btnDecrement.setOnClickListener(v -> {
+            count--;
+            updateCountDisplay();
+        });
+
+        btnReset.setOnClickListener(v -> {
+            count = 0;
+            updateCountDisplay();
+        });
+    }
+
+    private void updateCountDisplay() {
+        txtCount.setText(String.valueOf(count));
     }
 }
 ```
@@ -120,12 +151,14 @@ package jp.ac.jec.cm0199.jecandroidjavatemplate;
 
 - Java クラスが属するパッケージを宣言します
 - パッケージ名はアプリを一意に識別するための ID となります
-- 慣例として逆ドメイン形式（例: `jp.ac.jec.xxx`）を使用します
 
 ### 3.3 import 文
 
 ```java
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -135,21 +168,24 @@ import androidx.core.view.WindowInsetsCompat;
 
 | クラス | 役割 |
 |--------|------|
-| `Bundle` | Activity 間のデータ受け渡しや状態保存に使用 |
+| `Bundle` | Activity の状態保存に使用 |
+| `Button` | クリック可能なボタン UI |
+| `TextView` | テキスト表示 UI |
 | `EdgeToEdge` | 画面端までコンテンツを表示する機能 |
 | `AppCompatActivity` | 後方互換性のある Activity 基底クラス |
 | `Insets` | 画面の余白情報を保持 |
 | `ViewCompat` | View 操作の互換性ヘルパー |
 | `WindowInsetsCompat` | システムバーの余白情報 |
 
-### 3.4 クラス宣言
+### 3.4 フィールド
 
 ```java
-public class MainActivity extends AppCompatActivity {
+private int count = 0;
+private TextView txtCount;
 ```
 
-- `MainActivity` は `AppCompatActivity` を継承しています
-- `AppCompatActivity` を使うことで、古い Android バージョンでも新しい機能が使えます
+- `count` は現在のカウント値を保持します
+- `txtCount` は画面中央の数値表示に使用します
 
 ### 3.5 onCreate メソッド
 
@@ -157,45 +193,50 @@ public class MainActivity extends AppCompatActivity {
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    EdgeToEdge.enable(this);
+    setContentView(R.layout.activity_main);
     // ...
 }
 ```
 
 - Activity が作成されたときに呼ばれるメソッドです
-- `@Override` は親クラスのメソッドを上書きすることを示します
-- `super.onCreate()` で親クラスの初期化処理を実行します
+- `EdgeToEdge.enable()` でシステムバー領域まで表示を広げます
+- `setContentView()` でレイアウトを読み込みます
 
-### 3.6 EdgeToEdge の有効化
+### 3.6 View の取得
 
 ```java
-EdgeToEdge.enable(this);
+txtCount = findViewById(R.id.txt_count);
+Button btnIncrement = findViewById(R.id.btn_increment);
+Button btnDecrement = findViewById(R.id.btn_decrement);
+TextView btnReset = findViewById(R.id.btn_reset);
 ```
 
-- 画面の端（ステータスバーやナビゲーションバーの下）までコンテンツを表示します
-- モダンな Android アプリのデザインに対応します
+- XML に定義された View を Java から取得します
+- Reset は TextView ですが、クリックイベントを付けてボタンのように扱っています
 
-### 3.7 レイアウトの設定
-
-```java
-setContentView(R.layout.activity_main);
-```
-
-- `res/layout/activity_main.xml` をこの Activity の画面として設定します
-- `R` クラスはリソースへの参照を自動生成したクラスです
-
-### 3.8 システムバーの余白処理
+### 3.7 クリック処理
 
 ```java
-ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-    return insets;
+btnIncrement.setOnClickListener(v -> {
+    count++;
+    updateCountDisplay();
 });
 ```
 
-- EdgeToEdge を有効にした際、コンテンツがシステムバーと重ならないよう余白を設定します
-- `findViewById()` で XML 内の要素を取得します
-- ラムダ式 `(v, insets) -> { ... }` でリスナーを簡潔に記述しています
+- `setOnClickListener()` でクリック時の処理を登録します
+- カウントを更新したら `updateCountDisplay()` を呼び、表示を同期します
+
+### 3.8 表示更新メソッド
+
+```java
+private void updateCountDisplay() {
+    txtCount.setText(String.valueOf(count));
+}
+```
+
+- `count` を文字列化して `TextView` に反映します
+- 表示更新の処理をメソッドに切り出すことで重複を避けます
 
 ---
 
@@ -206,18 +247,104 @@ ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background_dark"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_reset"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="@string/reset"
+            android:textColor="@color/green_primary"
+            android:textSize="18sp"
+            android:padding="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/current_count"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:letterSpacing="0.2" />
+
+        <TextView
+            android:id="@+id/txt_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/green_primary"
+            android:textSize="120sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-black" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingHorizontal="32dp"
+        android:paddingBottom="80dp">
+
+        <Button
+            android:id="@+id/btn_decrement"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="-"
+            android:textSize="48sp"
+            android:textColor="@color/green_primary"
+            android:backgroundTint="@color/green_dark"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/btn_increment"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:text="+"
+            android:textSize="48sp"
+            android:textColor="@color/background_dark"
+            android:backgroundTint="@color/green_primary" />
+
+    </LinearLayout>
 
 </LinearLayout>
 ```
@@ -234,55 +361,53 @@ ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -
 
 ```xml
 xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
 xmlns:tools="http://schemas.android.com/tools"
 ```
 
 | 名前空間 | 用途 |
 |---------|------|
 | `android:` | Android 標準の属性 |
-| `app:` | ライブラリ固有の属性 |
 | `tools:` | 開発時のみ使用する属性（実行時は無視） |
 
-### 4.4 LinearLayout
+### 4.4 ルート LinearLayout
 
 ```xml
 <LinearLayout
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/background_dark">
 ```
 
 | 属性 | 値 | 説明 |
 |------|-----|------|
-| `android:id` | `@+id/main` | この要素の識別子（`@+id/` は新規作成） |
-| `android:layout_width` | `match_parent` | 親要素の幅いっぱいに広がる |
-| `android:layout_height` | `match_parent` | 親要素の高さいっぱいに広がる |
-| `android:orientation` | `vertical` | 子要素を縦方向に並べる |
+| `android:id` | `@+id/main` | インセット処理の対象 View |
+| `android:orientation` | `vertical` | 子要素を縦に並べる |
+| `android:background` | `@color/background_dark` | 画面全体の背景色 |
 
-### 4.5 TextView
+### 4.5 上部ヘッダー行
 
-```xml
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Hello World!" />
-```
+- 左右のスペースは `View` と `layout_weight` を使って確保しています
+- `Reset` は右寄せの TextView として配置されています
 
-| 属性 | 値 | 説明 |
-|------|-----|------|
-| `android:layout_width` | `wrap_content` | テキストの幅に合わせる |
-| `android:layout_height` | `wrap_content` | テキストの高さに合わせる |
-| `android:text` | `Hello World!` | 表示するテキスト |
+### 4.6 中央のカウント表示
 
-### 4.6 layout_width / layout_height の値
+- "CURRENT COUNT" のラベルと数値を縦に並べています
+- 数値は `textSize="120sp"` と `fontFamily="sans-serif-black"` で強調しています
+
+### 4.7 下部のボタン行
+
+- `-` は固定幅、`+` は `layout_weight` で伸縮
+- `backgroundTint` でボタンの色を調整しています
+
+### 4.8 layout_width / layout_height の値
 
 | 値 | 説明 |
 |----|------|
 | `match_parent` | 親要素のサイズに合わせる |
 | `wrap_content` | コンテンツのサイズに合わせる |
-| `100dp` | 固定サイズ（dp: density-independent pixels） |
+| `0dp` | 重み付け（`layout_weight`）と併用する |
 
 ---
 
@@ -294,7 +419,9 @@ xmlns:tools="http://schemas.android.com/tools"
 
 ```xml
 <resources>
-    <string name="app_name">JecAndroidJavaTemplate</string>
+    <string name="app_name">Counter</string>
+    <string name="current_count">CURRENT COUNT</string>
+    <string name="reset">Reset</string>
 </resources>
 ```
 
@@ -315,29 +442,50 @@ xmlns:tools="http://schemas.android.com/tools"
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="background_dark">#0D1F0D</color>
+    <color name="green_primary">#00FF41</color>
+    <color name="green_dark">#1A3D1A</color>
+    <color name="text_secondary">#80B080</color>
 </resources>
 ```
 
 **色の形式:** `#AARRGGBB`（AA: 透明度, RR: 赤, GG: 緑, BB: 青）
 
-### 5.3 AndroidManifest.xml
+### 5.3 themes.xml
+
+アプリ全体のテーマを定義します。
+
+```xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.JecAndroidJavaTemplate" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.JecAndroidJavaTemplate" parent="Base.Theme.JecAndroidJavaTemplate" />
+</resources>
+```
+
+### 5.4 AndroidManifest.xml
 
 アプリの基本情報を宣言するファイルです。
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
         android:theme="@style/Theme.JecAndroidJavaTemplate">
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -352,6 +500,8 @@ xmlns:tools="http://schemas.android.com/tools"
 | `android:icon` | アプリアイコン |
 | `android:label` | アプリ名 |
 | `android:theme` | アプリのテーマ |
+| `android:dataExtractionRules` | 自動バックアップの抽出ルール |
+| `android:fullBackupContent` | フルバックアップのルール |
 | `<activity>` | 画面（Activity）の宣言 |
 | `android:exported="true"` | 外部からの起動を許可 |
 | `intent-filter` | Activity の起動条件 |
@@ -395,124 +545,100 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ## 7. 演習問題
 
-### 演習 1: テキストを変更する
+### 演習 1: 起動時にカウントを表示する
 
-`activity_main.xml` の TextView を編集して、表示されるテキストを「こんにちは！」に変更してください。
-
-<details>
-<summary>解答例</summary>
-
-```xml
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="こんにちは！" />
-```
-
-</details>
-
-### 演習 2: 文字列リソースを使用する
-
-1. `strings.xml` に新しい文字列リソースを追加
-2. TextView で `@string/` を使って参照
+`onCreate()` の最後で `updateCountDisplay()` を呼び、初期値を画面に反映してください。
 
 <details>
 <summary>解答例</summary>
 
-**strings.xml:**
-```xml
-<resources>
-    <string name="app_name">JecAndroidJavaTemplate</string>
-    <string name="greeting">こんにちは！</string>
-</resources>
-```
-
-**activity_main.xml:**
-```xml
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/greeting" />
-```
-
-</details>
-
-### 演習 3: 複数の TextView を追加する
-
-LinearLayout 内に 3 つの TextView を追加し、それぞれ異なるテキストを表示してください。
-
-<details>
-<summary>解答例</summary>
-
-```xml
-<LinearLayout
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="1行目" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="2行目" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="3行目" />
-
-</LinearLayout>
-```
-
-</details>
-
-### 演習 4: TextView に ID を付けて Java から操作する
-
-1. TextView に `android:id` を設定
-2. MainActivity.java で `findViewById()` を使って TextView を取得
-3. `setText()` メソッドでテキストを変更
-
-<details>
-<summary>解答例</summary>
-
-**activity_main.xml:**
-```xml
-<TextView
-    android:id="@+id/text_greeting"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Hello World!" />
-```
-
-**MainActivity.java:**
 ```java
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     EdgeToEdge.enable(this);
     setContentView(R.layout.activity_main);
+    // ... 省略 ...
 
-    // TextView を取得してテキストを変更
-    TextView textGreeting = findViewById(R.id.text_greeting);
-    textGreeting.setText("Java から変更しました！");
-
-    ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-        Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-        v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-        return insets;
-    });
+    updateCountDisplay();
 }
 ```
 
-※ `import android.widget.TextView;` の追加が必要です。
+</details>
+
+### 演習 2: 増減幅を 5 にする
+
+`STEP` 定数を追加して、+/- の変化量を 5 に変更してください。
+
+<details>
+<summary>解答例</summary>
+
+```java
+private static final int STEP = 5;
+
+btnIncrement.setOnClickListener(v -> {
+    count += STEP;
+    updateCountDisplay();
+});
+
+btnDecrement.setOnClickListener(v -> {
+    count -= STEP;
+    updateCountDisplay();
+});
+```
+
+</details>
+
+### 演習 3: 0 未満にならないようにする
+
+減算時に 0 未満へ下がらないようガードしてください。
+
+<details>
+<summary>解答例</summary>
+
+```java
+btnDecrement.setOnClickListener(v -> {
+    if (count > 0) {
+        count--;
+        updateCountDisplay();
+    }
+});
+```
+
+</details>
+
+### 演習 4: 画面回転で値を保持する
+
+`onSaveInstanceState()` を使ってカウントを保存・復元してください。
+
+<details>
+<summary>解答例</summary>
+
+```java
+import androidx.annotation.NonNull;
+
+private static final String KEY_COUNT = "key_count";
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    EdgeToEdge.enable(this);
+    setContentView(R.layout.activity_main);
+
+    if (savedInstanceState != null) {
+        count = savedInstanceState.getInt(KEY_COUNT, 0);
+    }
+
+    // ... 省略 ...
+    updateCountDisplay();
+}
+
+@Override
+protected void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putInt(KEY_COUNT, count);
+}
+```
 
 </details>
 
@@ -524,8 +650,8 @@ protected void onCreate(Bundle savedInstanceState) {
 
 - **プロジェクト構成**: Android アプリの基本的なディレクトリ構造
 - **Activity**: 画面を制御するクラスと onCreate ライフサイクル
-- **レイアウト XML**: LinearLayout と TextView の基本
-- **リソース**: 文字列・色の管理方法
+- **レイアウト XML**: LinearLayout と Button/TextView の基本
+- **クリック処理**: カウントの増減と表示更新
 - **ビルド**: アプリの実行方法
 
-次のステップとして、ボタンの追加やユーザー入力の処理を学んでいきましょう。
+次のステップとして、保存処理や UI の改善を試してみましょう。

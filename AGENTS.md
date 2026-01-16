@@ -1,43 +1,44 @@
 # Repository Guidelines
 
-この ドキュメント は この リポジトリ の 参加者 向け ガイド です。Android Java テンプレート として の 作業 を 迅速 に 始める ため、構成 と 基本 ルール を まとめます。
+このドキュメントはこのリポジトリの参加者向けガイドです。Java ベースのカウンターアプリを迅速に理解し、作業を進めるための構成と基本ルールをまとめます。
 
 ## プロジェクト構成とモジュール
-- ルート は Gradle Kotlin DSL 構成 で、`settings.gradle.kts` と `build.gradle.kts` が 入口。
-- アプリ 本体 は 単一 モジュール `app/`。Java ソース は `app/src/main/java/jp/ac/jec/cm0199/jecandroidjavatemplate/`。
-- リソース は `app/src/main/res/`、マニフェスト は `app/src/main/AndroidManifest.xml`。
-- 共有 設定 は `gradle/` と `gradle/libs.versions.toml` で 管理。
+- ルートは Gradle Kotlin DSL 構成で、`settings.gradle.kts` と `build.gradle.kts` が入口。
+- アプリ本体は単一モジュール `app/`。Java ソースは `app/src/main/java/jp/ac/jec/cm0199/jecandroidjavatemplate/`。
+- 画面は `MainActivity` のみで、カウンターの増減/リセットを実装。
+- リソースは `app/src/main/res/`、マニフェストは `app/src/main/AndroidManifest.xml`。
+- 共有設定は `gradle/` と `gradle/libs.versions.toml` で管理。
 
 ## ビルド・テスト・開発コマンド
-- `./gradlew assembleDebug` : デバッグ APK を 生成。
-- `./gradlew assembleRelease` : リリース APK を 生成（minify は 無効）。
-- `./gradlew installDebug` : 接続 端末 に インストール。
-- `./gradlew test` : JVM ユニット テスト（JUnit4）。
-- `./gradlew connectedAndroidTest` : 実機 / エミュレータ 向け 計測 テスト。
-- `./gradlew lint` : Android Lint を 実行。
+- `./gradlew assembleDebug` : デバッグ APK を生成。
+- `./gradlew assembleRelease` : リリース APK を生成（minify は無効）。
+- `./gradlew installDebug` : 接続端末にインストール。
+- `./gradlew test` : JVM ユニットテスト（JUnit4）。
+- `./gradlew connectedAndroidTest` : 実機/エミュレータ向け計測テスト。
+- `./gradlew lint` : Android Lint を実行。
 
 ## コーディング規約と命名
-- Java 11 を 前提。インデント は 4 スペース、タブ 禁止。
-- クラス は PascalCase、メソッド / 変数 は lowerCamelCase。
-- リソース 名 は lower_snake_case。例: `activity_main.xml`, `@+id/btn_submit`。
-- 画面実装 は View System を採用する。
-- レイアウト は ConstraintLayout を 避け、必要 に 応じて LinearLayout など を 使用する。
-- ロジックも含めて処理 は Activityにまとめる。
-- EdgeToEdge を 有効 に し、システム バー の インセット を 処理する。
-- ダークテーマは非対応。
+- Java 11 を前提。インデントは 4 スペース、タブ禁止。
+- クラスは PascalCase、メソッド/変数は lowerCamelCase。
+- リソース名は lower_snake_case。例: `activity_main.xml`, `@+id/btn_increment`。
+- 画面実装は View System を採用する。
+- レイアウトは LinearLayout を基本とし、ConstraintLayout は避ける。
+- ロジックも含めて処理は Activity にまとめる。
+- EdgeToEdge を有効にし、システムバーのインセットを処理する。
+- UI はダーク配色固定（ライト/ダーク切り替えなし）。
 
 ## テスト方針
-- 単体 テスト は `app/src/test/java/`、計測 テスト は `app/src/androidTest/java/`。
-- 新規 修正 には 再現 テスト を 追加 し、`*Test.java` 命名 を 維持。
-- UI 変更 は Espresso の 追加 を 検討。
+- 単体テストは `app/src/test/java/`、計測テストは `app/src/androidTest/java/`。
+- 新規修正には再現テストを追加し、`*Test.java` 命名を維持。
+- UI 変更は Espresso の追加を検討。
 
 ## コミット & PR
-- `.git` が 無いため 既存 ルール を 確認 できない。短い 命令形 + 変更 内容（例: "Add settings screen"）を 推奨。
-- PR には 目的、変更 点、実行 した コマンド を 記載。UI 変更 は スクリーンショット を 添付。
+- `.git` が無いため既存ルールを確認できない。短い命令形 + 変更内容（例: "Add settings screen"）を推奨。
+- PR には目的、変更点、実行したコマンドを記載。UI 変更はスクリーンショットを添付。
 
 ## 設定・環境
-- `local.properties` は SDK パス 用。個人 環境 の 値 は 共有 しない。
-- 依存 バージョン 変更 は 影響 範囲 を 記録 し、`gradle/libs.versions.toml` を 更新。
+- `local.properties` は SDK パス用。個人環境の値は共有しない。
+- 依存バージョン変更は影響範囲を記録し、`gradle/libs.versions.toml` を更新。
 
 ## ドキュメント
 - `README.md` : プロジェクト概要とセットアップ手順。
