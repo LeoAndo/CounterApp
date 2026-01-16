@@ -30,4 +30,6 @@
 - 文字列: `app_name`=Counter, `current_count`=CURRENT COUNT, `reset`=Reset
 
 ## 画面イメージ
-![カウンター画面](img.png)
+|  カウンター画面 | 
+|:-----------:|
+| <img src="img.png" width=50% />|
